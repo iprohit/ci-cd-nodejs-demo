@@ -1,44 +1,46 @@
-### This repository is no longer maintained!
+# CI/CD Pipeline with Node.js, Docker & GitHub Actions 🚀
 
-**For the most up to date test app to get you started on Heroku, head on over to [`node-js-getting-started`](https://github.com/heroku/node-js-getting-started).**
+This project demonstrates a simple **CI/CD pipeline** using a sample Node.js app, **Docker**, and **GitHub Actions**.
 
 ---
 
-# node-js-sample
+## 📦 Tech Stack
 
-A barebones Node.js app using [Express 4](http://expressjs.com/).
+- Node.js
+- Docker
+- GitHub Actions
+- DockerHub (for image storage)
 
-## Running Locally
+---
 
-Make sure you have [Node.js](http://nodejs.org/) and the [Heroku Toolbelt](https://toolbelt.heroku.com/) installed.
+## 🎯 What This Project Does
 
-```sh
-git clone git@github.com:heroku/node-js-sample.git # or clone your own fork
-cd node-js-sample
-npm install
-npm start
-```
+- Runs `npm install` to install dependencies
+- Optionally runs `npm test` (with dummy or real tests)
+- Builds a Docker image from the app
+- Logs into DockerHub (via GitHub Secrets)
+- Pushes the image to DockerHub on every push to the `main` branch
 
-Your app should now be running on [localhost:5000](http://localhost:5000/).
+---
 
-## Deploying to Heroku
+## 🛠️ CI/CD Workflow (`.github/workflows/main.yml`)
 
-```
-heroku create
-git push heroku master
-heroku open
-```
+```yaml
+on:
+  push:
+    branches: [main]
 
-Alternatively, you can deploy your own copy of the app using the web-based flow:
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
-
-## Documentation
-
-For more information about using Node.js on Heroku, see these Dev Center articles:
-
-- [10 Habits of a Happy Node Hacker](https://blog.heroku.com/archives/2014/3/11/node-habits)
-- [Getting Started with Node.js on Heroku](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
-- [Heroku Node.js Support](https://devcenter.heroku.com/articles/nodejs-support)
-- [Node.js on Heroku](https://devcenter.heroku.com/categories/nodejs)
-- [Using WebSockets on Heroku with Node.js](https://devcenter.heroku.com/articles/node-websockets)
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    - run: npm install
+    - run: npm test  # optional or replaced with dummy script
+    - run: docker build -t your-dockerhub-username/nodejs-app .
+    - run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    - run: docker push your-dockerhub-username/nodejs-app
